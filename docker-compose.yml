@@ -1,0 +1,16 @@
+services:
+  id-ledger:
+    image: ghcr.io/rogeecn/id-ledger:latest
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      ID_LEDGER_TOKEN: "${ID_LEDGER_TOKEN:?set ID_LEDGER_TOKEN}"
+      ID_LEDGER_ADDR: ":3000"
+      ID_LEDGER_DATABASE_PATH: "/data/id-ledger.db"
+    volumes:
+      - id-ledger-data:/data
+
+volumes:
+  id-ledger-data:

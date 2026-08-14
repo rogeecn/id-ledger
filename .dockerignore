@@ -1,0 +1,6 @@
+.git
+.github
+coverage.out
+id-ledger.db
+*.db-shm
+*.db-wal

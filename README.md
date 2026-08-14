@@ -18,6 +18,30 @@ Configuration uses environment variables:
 
 `GET /healthz` is public. All other endpoints require `Authorization: Bearer <token>`.
 
+### Docker Compose
+
+Set a strong token, then start the service with its SQLite database stored in a named volume:
+
+```sh
+export ID_LEDGER_TOKEN=change-me
+docker compose up -d
+```
+
+The service is available on port `3000`, and Compose persists the database in the `id-ledger-data` volume.
+
+### Container image
+
+Images from `main` and `v*` tags are published to `ghcr.io/rogeecn/id-ledger`; pull requests only test and build the image without publishing it:
+
+```sh
+docker run --rm -p 3000:3000 \
+  -e ID_LEDGER_TOKEN=change-me \
+  -v id-ledger-data:/data \
+  ghcr.io/rogeecn/id-ledger:latest
+```
+
+After the first workflow publish, a repository owner must open the `id-ledger` package settings on GitHub and change its visibility to **Public**. This is a one-time manual step; the workflow does not change package visibility.
+
 ## API
 
 Write up to 1000 IDs atomically; duplicates are ignored:
