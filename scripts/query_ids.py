@@ -28,11 +28,11 @@ def query_ids(base_url, token, project, since, until=None, limit=100, opener=url
             if until:
                 params["until"] = until
 
-        request = Request(
-            f"{endpoint}?{urlencode(params)}",
-            headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
-        )
         try:
+            request = Request(
+                f"{endpoint}?{urlencode(params)}",
+                headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
+            )
             with opener(request, timeout=30) as response:
                 payload = json.load(response)
         except HTTPError as error:
@@ -45,7 +45,11 @@ def query_ids(base_url, token, project, since, until=None, limit=100, opener=url
             raise QueryError(f"HTTP {error.code}: {str(detail).strip() or error.reason}") from error
         except URLError as error:
             raise QueryError(f"request failed: {error.reason}") from error
-        except (OSError, json.JSONDecodeError) as error:
+        except json.JSONDecodeError as error:
+            raise QueryError(f"invalid response: {error}") from error
+        except ValueError as error:
+            raise QueryError(f"invalid URL: {error}") from error
+        except OSError as error:
             raise QueryError(f"invalid response: {error}") from error
 
         if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):

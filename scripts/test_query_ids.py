@@ -1,10 +1,13 @@
 import io
 import json
+import os
 import unittest
+from contextlib import redirect_stderr
+from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 
-from query_ids import QueryError, query_ids
+from query_ids import QueryError, main, query_ids
 
 
 class FakeOpener:
@@ -60,6 +63,15 @@ class QueryIDsTest(unittest.TestCase):
 
         with self.assertRaisesRegex(QueryError, "HTTP 401: unauthorized"):
             list(query_ids("https://ledger.example", "bad", "demo", "2026-08-14T00:00:00Z", opener=FakeOpener(error)))
+
+    def test_invalid_base_url_exits_without_traceback(self):
+        stderr = io.StringIO()
+        with patch.dict(os.environ, {"ID_LEDGER_TOKEN": "secret"}), redirect_stderr(stderr):
+            status = main(["demo", "--since", "2026-08-14T00:00:00Z", "--base-url", "not-a-url"])
+
+        self.assertEqual(status, 1)
+        self.assertTrue(stderr.getvalue().startswith("error: invalid URL:"))
+        self.assertNotIn("Traceback", stderr.getvalue())
 
 
 if __name__ == "__main__":
