@@ -91,6 +91,52 @@ func TestTimeCursorPagination(t *testing.T) {
 	}
 }
 
+func TestTimeRangeRequiresWholeSeconds(t *testing.T) {
+	createdAt := time.Date(2026, 8, 14, 14, 0, 0, 0, time.UTC)
+	server := newTestServer(t, createdAt)
+	response := doRequest(t, server.App(), http.MethodPost, "/v1/projects/demo/ids", []byte(`{"ids":["one"]}`), "secret")
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("write status = %d", response.StatusCode)
+	}
+
+	for name, path := range map[string]string{
+		"fractional since": "/v1/projects/demo/ids?since=2026-08-14T14%3A00%3A00.500Z&until=2026-08-14T14%3A00%3A01Z",
+		"fractional until": "/v1/projects/demo/ids?since=2026-08-14T13%3A59%3A59Z&until=2026-08-14T14%3A00%3A00.500Z",
+	} {
+		t.Run(name, func(t *testing.T) {
+			response := doRequest(t, server.App(), http.MethodGet, path, nil, "secret")
+			response.Body.Close()
+			if response.StatusCode != http.StatusBadRequest {
+				t.Fatalf("status = %d", response.StatusCode)
+			}
+		})
+	}
+
+	for name, test := range map[string]struct {
+		path  string
+		count int
+	}{
+		"inclusive since": {
+			path:  "/v1/projects/demo/ids?since=2026-08-14T14%3A00%3A00Z&until=2026-08-14T14%3A00%3A01Z",
+			count: 1,
+		},
+		"exclusive until": {
+			path:  "/v1/projects/demo/ids?since=2026-08-14T13%3A59%3A59Z&until=2026-08-14T14%3A00%3A00Z",
+			count: 0,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			response := doRequest(t, server.App(), http.MethodGet, test.path, nil, "secret")
+			var listed listResponse
+			decodeResponse(t, response, http.StatusOK, &listed)
+			if len(listed.Items) != test.count {
+				t.Fatalf("item count = %d", len(listed.Items))
+			}
+		})
+	}
+}
+
 func newTestServer(t *testing.T, now time.Time) *Server {
 	t.Helper()
 	connection, err := database.Open(":memory:")

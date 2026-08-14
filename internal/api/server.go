@@ -238,9 +238,12 @@ func parseTime(value string, required bool) (time.Time, error) {
 		}
 		return time.Time{}, nil
 	}
+	if strings.ContainsAny(value, ".,") {
+		return time.Time{}, errors.New("times must use whole-second RFC3339")
+	}
 	parsed, err := time.Parse(time.RFC3339, value)
 	if err != nil {
-		return time.Time{}, errors.New("times must use RFC3339")
+		return time.Time{}, errors.New("times must use whole-second RFC3339")
 	}
 	return parsed.UTC(), nil
 }

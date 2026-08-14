@@ -24,12 +24,13 @@ Write up to 1000 IDs atomically; duplicates are ignored:
 
 ```http
 POST /v1/projects/{project_key}/ids
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {"ids":["id-1","id-2"]}
 ```
 
-Read IDs in a half-open RFC3339 time range, newest first:
+Read IDs in a half-open, whole-second RFC3339 time range, newest first. Fractional seconds are rejected:
 
 ```http
 GET /v1/projects/{project_key}/ids?since=2026-08-14T00:00:00Z&until=2026-08-15T00:00:00Z&limit=100
