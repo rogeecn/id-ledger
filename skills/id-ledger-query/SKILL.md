@@ -5,10 +5,10 @@ description: Query collected IDs from ID Ledger by project and whole-second RFC3
 
 # Query ID Ledger
 
-Set `ID_LEDGER_URL` and `ID_LEDGER_TOKEN`, then run the repository script from the repository root:
+Set `ID_LEDGER_URL` and `ID_LEDGER_TOKEN`, then run the bundled script using the path to this Skill directory:
 
 ```sh
-python3 scripts/query_ids.py PROJECT_KEY \
+python3 <skill-dir>/scripts/query_ids.py PROJECT_KEY \
   --since 2026-08-14T00:00:00Z \
   --until 2026-08-15T00:00:00Z
 ```
