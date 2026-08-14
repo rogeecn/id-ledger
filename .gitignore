@@ -2,3 +2,4 @@ coverage.out
 *.db
 *.db-shm
 *.db-wal
+__pycache__/

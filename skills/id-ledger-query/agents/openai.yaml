@@ -1,0 +1,4 @@
+interface:
+  display_name: "ID Ledger Query"
+  short_description: "Query project IDs across paginated time ranges"
+  default_prompt: "Use $id-ledger-query to fetch collected IDs for a project and time range."
