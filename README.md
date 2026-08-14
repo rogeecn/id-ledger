@@ -29,6 +29,16 @@ docker compose up -d
 
 The service is available on port `3000`, and Compose persists the database in the `id-ledger-data` volume.
 
+To use a local bind mount instead, change the volume mapping to `./data:/data` and prepare the directory before starting the container:
+
+```sh
+mkdir -p ./data
+sudo chown -R 100:101 ./data
+sudo chmod 750 ./data
+```
+
+In the current `f934cd5` image, the `id-ledger` user was verified as UID `100` and GID `101`. These values are currently assigned by Alpine when the system user is created; the Dockerfile does not explicitly fix them, so recheck them after changing the base image.
+
 ### Container image
 
 Images from `main` and `v*` tags are published to `ghcr.io/rogeecn/id-ledger`; pull requests only test and build the image without publishing it:
